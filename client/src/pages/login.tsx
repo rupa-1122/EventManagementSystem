@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,8 +14,18 @@ import type { LoginRequest } from "@shared/schema";
 export default function Login() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"student" | "admin">("student");
+  const [showRegister, setShowRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [registerData, setRegisterData] = useState({
+    fullName: "",
+    rollNumber: "",
+    email: "",
+    phoneNumber: "",
+    branch: "",
+    yearOfStudy: "",
+    password: "",
+  });
   const { toast } = useToast();
 
   const loginMutation = useMutation({
@@ -48,6 +59,28 @@ export default function Login() {
     },
   });
 
+  const registerMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/auth/register", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Registration successful",
+        description: "You can now login with your credentials",
+      });
+      setShowRegister(false);
+      setEmail(registerData.email);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -70,6 +103,32 @@ export default function Login() {
     }
 
     loginMutation.mutate({ email, password });
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!registerData.fullName || !registerData.rollNumber || !registerData.email || 
+        !registerData.phoneNumber || !registerData.branch || !registerData.yearOfStudy || 
+        !registerData.password) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registerData.email.includes("@view.edu.in")) {
+      toast({
+        title: "Invalid email",
+        description: "Please use your VIEW email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    registerMutation.mutate(registerData);
   };
 
   return (
@@ -131,43 +190,173 @@ export default function Login() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <Label htmlFor="email">
-                    {activeTab === "student" ? "Email Address" : "Admin Email"}
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={
-                      activeTab === "student" 
-                        ? "21XM1A0501@view.edu.in" 
-                        : "admin@view.edu.in"
-                    }
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={loginMutation.isPending}
-                >
-                  {loginMutation.isPending ? "Signing in..." : `Sign In as ${activeTab === "student" ? "Student" : "Admin"}`}
-                </Button>
-              </form>
+{!showRegister ? (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <Label htmlFor="email">
+                      {activeTab === "student" ? "Email Address" : "Admin Email"}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={
+                        activeTab === "student" 
+                          ? "21XM1A0501@view.edu.in" 
+                          : "view123@view.edu.in"
+                      }
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={loginMutation.isPending}
+                  >
+                    {loginMutation.isPending ? "Signing in..." : `Sign In as ${activeTab === "student" ? "Student" : "Admin"}`}
+                  </Button>
+                  
+                  {activeTab === "student" && (
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Don't have an account?{" "}
+                        <button
+                          type="button"
+                          onClick={() => setShowRegister(true)}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Create an account
+                        </button>
+                      </p>
+                    </div>
+                  )}
+                </form>
+              ) : (
+                <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Input
+                        id="fullName"
+                        placeholder="Enter your full name"
+                        value={registerData.fullName}
+                        onChange={(e) => setRegisterData(prev => ({ ...prev, fullName: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rollNumber">Roll Number *</Label>
+                      <Input
+                        id="rollNumber"
+                        placeholder="e.g., 21XM1A0501"
+                        value={registerData.rollNumber}
+                        onChange={(e) => setRegisterData(prev => ({ ...prev, rollNumber: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="registerEmail">Email Address *</Label>
+                      <Input
+                        id="registerEmail"
+                        type="email"
+                        placeholder="21XM1A0501@view.edu.in"
+                        value={registerData.email}
+                        onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phoneNumber">Phone Number *</Label>
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="9876543210"
+                        value={registerData.phoneNumber}
+                        onChange={(e) => setRegisterData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="branch">Branch *</Label>
+                      <Select onValueChange={(value) => setRegisterData(prev => ({ ...prev, branch: value }))}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select your branch" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CSE">Computer Science Engineering</SelectItem>
+                          <SelectItem value="ECE">Electronics & Communication</SelectItem>
+                          <SelectItem value="EEE">Electrical & Electronics</SelectItem>
+                          <SelectItem value="MECH">Mechanical Engineering</SelectItem>
+                          <SelectItem value="CIVIL">Civil Engineering</SelectItem>
+                          <SelectItem value="IT">Information Technology</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="yearOfStudy">Year of Study *</Label>
+                      <Select onValueChange={(value) => setRegisterData(prev => ({ ...prev, yearOfStudy: value }))}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1st Year">1st Year</SelectItem>
+                          <SelectItem value="2nd Year">2nd Year</SelectItem>
+                          <SelectItem value="3rd Year">3rd Year</SelectItem>
+                          <SelectItem value="4th Year">4th Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="registerPassword">Password *</Label>
+                    <Input
+                      id="registerPassword"
+                      type="password"
+                      placeholder="Password (uppercase, number, special character required)"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="flex space-x-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowRegister(false)}
+                      className="flex-1"
+                    >
+                      Back to Login
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </CardContent>
           </Card>
 

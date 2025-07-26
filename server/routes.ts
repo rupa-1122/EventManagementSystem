@@ -33,6 +33,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const userData = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      const user = await storage.createUser({
+        ...userData,
+        role: "student",
+      });
+
+      res.json({ 
+        message: "Registration successful",
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role,
+          fullName: user.fullName,
+          rollNumber: user.rollNumber 
+        }
+      });
+    } catch (error) {
+      res.status(400).json({ message: "Registration failed" });
+    }
+  });
+
   app.post("/api/auth/logout", async (req, res) => {
     try {
       const { sessionId } = req.body;
@@ -168,6 +198,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(studentActivity);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch student activity" });
+    }
+  });
+
+  // User management routes
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users.map(user => ({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName,
+        rollNumber: user.rollNumber,
+        branch: user.branch,
+        yearOfStudy: user.yearOfStudy,
+        phoneNumber: user.phoneNumber,
+        createdAt: user.createdAt,
+      })));
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const updatedUser = await storage.updateUser(id, updates);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        fullName: updatedUser.fullName,
+        rollNumber: updatedUser.rollNumber,
+        branch: updatedUser.branch,
+        yearOfStudy: updatedUser.yearOfStudy,
+        phoneNumber: updatedUser.phoneNumber,
+        createdAt: updatedUser.createdAt,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Event category management routes
+  app.get("/api/admin/event-categories", async (req, res) => {
+    try {
+      const categories = await storage.getEventCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event categories" });
+    }
+  });
+
+  app.post("/api/admin/event-categories", async (req, res) => {
+    try {
+      const { category } = req.body;
+      await storage.addEventCategory(category);
+      res.json({ message: "Category added successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add category" });
+    }
+  });
+
+  app.delete("/api/admin/event-categories/:category", async (req, res) => {
+    try {
+      const { category } = req.params;
+      await storage.deleteEventCategory(decodeURIComponent(category));
+      res.json({ message: "Category deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Event management routes
+  app.post("/api/admin/events", async (req, res) => {
+    try {
+      const eventData = req.body;
+      const event = await storage.createEvent(eventData);
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+
+  app.delete("/api/admin/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteEvent(id);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete event" });
     }
   });
 

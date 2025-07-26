@@ -255,8 +255,8 @@ export default function RegistrationModal({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={registrationMutation.isPending}>
-              {registrationMutation.isPending ? "Submitting..." : "Submit Registration"}
+            <Button type="submit" disabled={registrationMutation.isPending} className="bg-blue-500 hover:bg-blue-600">
+              {registrationMutation.isPending ? "Sending..." : "✈ Send Message"}
             </Button>
           </div>
         </form>

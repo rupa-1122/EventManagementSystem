@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   LogOut, 
   Calendar, 
@@ -12,7 +17,8 @@ import {
   Zap, 
   Plus,
   Trash2,
-  Edit
+  Edit,
+  UserCog
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -33,6 +39,20 @@ interface StudentActivity {
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showCreateEventModal, setShowCreateEventModal] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [newEvent, setNewEvent] = useState({
+    name: "",
+    description: "",
+    category: "",
+    date: "",
+    time: "",
+    maxSeats: 100,
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
     const userData = localStorage.getItem("currentUser");
@@ -60,6 +80,21 @@ export default function AdminDashboard() {
     enabled: !!currentUser,
   });
 
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
+    enabled: !!currentUser,
+  });
+
+  const { data: eventCategories = [] } = useQuery<string[]>({
+    queryKey: ["/api/admin/event-categories"],
+    enabled: !!currentUser,
+  });
+
+  const { data: events = [] } = useQuery({
+    queryKey: ["/api/events"],
+    enabled: !!currentUser,
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const sessionId = localStorage.getItem("sessionId");
@@ -76,15 +111,70 @@ export default function AdminDashboard() {
     logoutMutation.mutate();
   };
 
-  const eventCategories = [
-    { name: "Arts & Crafts", description: "Creative arts, crafts, and design competitions" },
-    { name: "Cultural", description: "Cultural events and traditional performances" },
-    { name: "Dance", description: "Traditional and modern dance competitions" },
-    { name: "Photography", description: "Creative photography contests and exhibitions" },
-    { name: "Singing", description: "Vocal performances and singing competitions" },
-    { name: "Sports", description: "Various sports events and competitions" },
-    { name: "Technical", description: "Programming, coding, and technical competitions" },
-  ];
+  // Mutations for managing categories
+  const addCategoryMutation = useMutation({
+    mutationFn: async (category: string) => {
+      return apiRequest("POST", "/api/admin/event-categories", { category });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/event-categories"] });
+      toast({ title: "Category added successfully" });
+      setNewCategory("");
+      setShowCategoryModal(false);
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (category: string) => {
+      return apiRequest("DELETE", `/api/admin/event-categories/${encodeURIComponent(category)}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/event-categories"] });
+      toast({ title: "Category deleted successfully" });
+    },
+  });
+
+  // Mutations for user management
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<User> }) => {
+      return apiRequest("PATCH", `/api/admin/users/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "User updated successfully" });
+      setEditingUser(null);
+    },
+  });
+
+  // Mutations for event management
+  const createEventMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      return apiRequest("POST", "/api/admin/events", eventData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      toast({ title: "Event created successfully" });
+      setNewEvent({
+        name: "",
+        description: "",
+        category: "",
+        date: "",
+        time: "",
+        maxSeats: 100,
+      });
+      setShowCreateEventModal(false);
+    },
+  });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      return apiRequest("DELETE", `/api/admin/events/${eventId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      toast({ title: "Event deleted successfully" });
+    },
+  });
 
   if (!currentUser) {
     return null;
@@ -167,6 +257,52 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Management Buttons */}
+        <div className="flex gap-4 mb-6">
+          <Button onClick={() => setShowUserManagement(!showUserManagement)} variant="outline">
+            <UserCog className="mr-2 h-4 w-4" />
+            User Management
+          </Button>
+          <Button onClick={() => setShowCategoryModal(true)} variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Manage Categories
+          </Button>
+          <Button onClick={() => setShowCreateEventModal(true)} className="bg-blue-500 hover:bg-blue-600">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Event
+          </Button>
+        </div>
+
+        {/* User Management Section */}
+        {showUserManagement && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>User Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {users.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{user.fullName}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="text-sm">Role: {user.role}</p>
+                    </div>
+                    <Button
+                      onClick={() => setEditingUser(user)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Role
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Event Categories */}
@@ -305,6 +441,164 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Category Management Modal */}
+      <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Event Categories</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="New category name..."
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <Button 
+                onClick={() => addCategoryMutation.mutate(newCategory)}
+                disabled={!newCategory || addCategoryMutation.isPending}
+              >
+                Add
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {eventCategories.map((category) => (
+                <div key={category} className="flex items-center justify-between p-2 border rounded">
+                  <span>{category}</span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteCategoryMutation.mutate(category)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Role Edit Modal */}
+      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User Role</DialogTitle>
+          </DialogHeader>
+          {editingUser && (
+            <div className="space-y-4">
+              <div>
+                <Label>Full Name</Label>
+                <Input value={editingUser.fullName} disabled />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input value={editingUser.email} disabled />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Select 
+                  defaultValue={editingUser.role}
+                  onValueChange={(value) => 
+                    updateUserMutation.mutate({ 
+                      id: editingUser.id, 
+                      updates: { role: value as "student" | "admin" } 
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Event Modal */}
+      <Dialog open={showCreateEventModal} onOpenChange={setShowCreateEventModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); createEventMutation.mutate(newEvent); }} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Event Name</Label>
+                <Input
+                  value={newEvent.name}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter event name"
+                />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select 
+                  value={newEvent.category}
+                  onValueChange={(value) => setNewEvent(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eventCategories.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input
+                value={newEvent.description}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Event description"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Time</Label>
+                <Input
+                  type="time"
+                  value={newEvent.time}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, time: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Max Seats</Label>
+                <Input
+                  type="number"
+                  value={newEvent.maxSeats}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, maxSeats: parseInt(e.target.value) }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={() => setShowCreateEventModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createEventMutation.isPending}>
+                Create Event
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

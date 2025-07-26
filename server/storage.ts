@@ -7,12 +7,14 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
 
   // Event methods
   getAllEvents(): Promise<Event[]>;
   getEvent(id: string): Promise<Event | undefined>;
   createEvent(event: InsertEvent): Promise<Event>;
   updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined>;
+  deleteEvent(id: string): Promise<void>;
 
   // Registration methods
   createRegistration(registration: InsertRegistration): Promise<Registration>;
@@ -25,6 +27,11 @@ export interface IStorage {
   getActiveSessions(): Promise<Session[]>;
   getUserSessions(userId: string): Promise<Session[]>;
   deactivateSession(sessionId: string): Promise<void>;
+
+  // Event Category methods
+  getEventCategories(): Promise<string[]>;
+  addEventCategory(category: string): Promise<void>;
+  deleteEventCategory(category: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -32,12 +39,14 @@ export class MemStorage implements IStorage {
   private events: Map<string, Event>;
   private registrations: Map<string, Registration>;
   private sessions: Map<string, Session>;
+  private eventCategories: Set<string>;
 
   constructor() {
     this.users = new Map();
     this.events = new Map();
     this.registrations = new Map();
     this.sessions = new Map();
+    this.eventCategories = new Set();
     
     // Initialize with default data
     this.initializeDefaultData();
@@ -48,8 +57,8 @@ export class MemStorage implements IStorage {
     const adminId = randomUUID();
     const admin: User = {
       id: adminId,
-      email: "admin@view.edu.in",
-      password: "admin123",
+      email: "view123@view.edu.in",
+      password: "View@123",
       role: "admin",
       fullName: "System Administrator",
       rollNumber: null,
@@ -59,6 +68,18 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
     this.users.set(adminId, admin);
+
+    // Initialize default event categories
+    const defaultCategories = [
+      "Arts & Crafts",
+      "Cultural", 
+      "Dance",
+      "Photography",
+      "Singing",
+      "Sports",
+      "Technical",
+    ];
+    defaultCategories.forEach(category => this.eventCategories.add(category));
 
     // Create default events
     const techEventId = randomUUID();
@@ -126,6 +147,10 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
   async getAllEvents(): Promise<Event[]> {
     return Array.from(this.events.values()).filter(event => event.isActive);
   }
@@ -158,6 +183,10 @@ export class MemStorage implements IStorage {
     const updatedEvent = { ...event, ...updates };
     this.events.set(id, updatedEvent);
     return updatedEvent;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    this.events.delete(id);
   }
 
   async createRegistration(insertRegistration: InsertRegistration): Promise<Registration> {
@@ -217,6 +246,18 @@ export class MemStorage implements IStorage {
     if (session) {
       this.sessions.set(sessionId, { ...session, isActive: false });
     }
+  }
+
+  async getEventCategories(): Promise<string[]> {
+    return Array.from(this.eventCategories);
+  }
+
+  async addEventCategory(category: string): Promise<void> {
+    this.eventCategories.add(category);
+  }
+
+  async deleteEventCategory(category: string): Promise<void> {
+    this.eventCategories.delete(category);
   }
 }
 
