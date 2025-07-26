@@ -56,18 +56,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const userData = localStorage.getItem("currentUser");
-    if (!userData) {
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.role !== "admin") {
+        setLocation("/");
+        return;
+      }
+      setCurrentUser(user);
+    } else {
       setLocation("/");
-      return;
     }
-    
-    const user = JSON.parse(userData);
-    if (user.role !== "admin") {
-      setLocation("/");
-      return;
-    }
-    
-    setCurrentUser(user);
   }, [setLocation]);
 
   const { data: stats } = useQuery<AdminStats>({
@@ -97,8 +95,7 @@ export default function AdminDashboard() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const sessionId = localStorage.getItem("sessionId");
-      return apiRequest("POST", "/api/auth/logout", { sessionId });
+      return apiRequest("POST", "/api/auth/logout");
     },
     onSuccess: () => {
       localStorage.removeItem("currentUser");
@@ -304,142 +301,62 @@ export default function AdminDashboard() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Event Categories */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Event Categories for Yuvatarang</CardTitle>
+        {/* Event Management */}
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Event Management</CardTitle>
+            <Button onClick={() => setShowCreateEventModal(true)} className="bg-blue-500 hover:bg-blue-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Event
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {events.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No events created yet. Create your first event!
               </div>
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Category
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {eventCategories.map((category) => (
-                  <Card key={category.name} className="border">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-gray-900">{category.name}</h3>
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{category.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Event Management and Student Activity */}
-          <div className="space-y-6">
-            {/* Event Management */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Event Management</CardTitle>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Event
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+            ) : (
+              events.map((event: any) => (
+                <div key={event.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Techritz</h3>
+                    <h3 className="font-medium text-gray-900">{event.name}</h3>
                     <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <Calendar className="w-4 h-4 mr-1" />
-                      dec 15 2025
+                      {event.date || "TBD"}
                       <span className="mx-2">•</span>
                       <Users className="w-4 h-4 mr-1" />
-                      0 / 500
+                      {event.currentRegistrations || 0} / {event.maxSeats}
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "0%" }}></div>
+                      <div 
+                        className="bg-primary h-2 rounded-full" 
+                        style={{ 
+                          width: `${((event.currentRegistrations || 0) / event.maxSeats) * 100}%` 
+                        }}
+                      ></div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">0% capacity filled</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {Math.round(((event.currentRegistrations || 0) / event.maxSeats) * 100)}% capacity filled
+                    </p>
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
                     <Button variant="ghost" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => deleteEventMutation.mutate(event.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">yuvatarang</h3>
-                    <div className="flex items-center text-sm text-muted-foreground mt-1">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      <span className="text-gray-400">TBD</span>
-                      <span className="mx-2">•</span>
-                      <Users className="w-4 h-4 mr-1" />
-                      0 / 5000
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "0%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">0% capacity filled</p>
-                  </div>
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Student Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Student Activity</CardTitle>
-                <p className="text-sm text-muted-foreground">Latest registrations and student engagement</p>
-              </CardHeader>
-              <CardContent>
-                {studentActivity.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="mx-auto w-12 h-12 text-gray-400" />
-                    <p className="text-muted-foreground mt-2">No recent activity.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {studentActivity.map((activity) => (
-                      <div key={activity.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
-                            <span className="text-white text-sm font-medium">
-                              {activity.studentName.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{activity.studentName}</p>
-                            <p className="text-sm text-muted-foreground">{activity.email}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Logged in</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(activity.loginTime).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Category Management Modal */}
@@ -490,7 +407,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div>
                 <Label>Full Name</Label>
-                <Input value={editingUser.fullName} disabled />
+                <Input value={editingUser.fullName || ""} disabled />
               </div>
               <div>
                 <Label>Email</Label>

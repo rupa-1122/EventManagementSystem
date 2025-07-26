@@ -189,9 +189,15 @@ export default function StudentDashboard() {
                       <span className="text-sm text-muted-foreground">
                         Seats: {event.currentRegistrations}/{event.maxSeats}
                       </span>
-                      <Button onClick={() => handleRegister(event)}>
-                        Register
-                      </Button>
+                      {userRegistrations.some(reg => reg.eventId === event.id) ? (
+                        <Button disabled className="bg-green-600 hover:bg-green-700">
+                          Registered
+                        </Button>
+                      ) : (
+                        <Button onClick={() => handleRegister(event)}>
+                          Register
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
