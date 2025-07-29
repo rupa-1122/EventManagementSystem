@@ -30,20 +30,20 @@ A responsive web application for managing student events at Vignan Institute. It
 ## 🖼️ Screenshots
 
 ### 🔐 Student Login & Registration
-![Student Login](./screenshots/student-login.png)
-![Student Registration](./screenshots/student-register.png)
+![Student Login](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/1.png)
+![Student Registration](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/2.png)
 
 ### 📊 Student Dashboard
-![Student Dashboard](./screenshots/student-dashboard.png)
+![Student Dashboard] (https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/3.png)
 
 ### 📝 Event Registration Form
-![Event Registration Form](./screenshots/event-register-form.png)
+![Event Registration Form](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/4.png)
 
 ### 🧑‍💼 Admin Dashboard
-![Admin Dashboard](./screenshots/admin-dashboard.png)
+![Admin Dashboard](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/5.png)
 
 ### 🆕 Create New Event (Admin)
-![Create New Event](./screenshots/create-event-modal.png)
+![Create New Event](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/6.png)
 
 ---
 
@@ -73,8 +73,8 @@ npm install
 npm run dev
 ⚠️ Ensure MongoDB/MySQL is running locally and DB connection string is set in .env.
 
-📋 Registration Rules
-Students must use Vignan domain email (21XM1AXXXX@view.edu.in)
+##📋 Registration Rules
+Students must use Vignan domain email (21NM1AXXXX@view.edu.in)
 
 Passwords should include:
 
@@ -84,7 +84,7 @@ Number
 
 Special character
 
-📂 Project Structure
+## 📂 Project Structure
 bash
 Copy
 Edit
@@ -99,9 +99,9 @@ Edit
 ├── screenshots/             # Screenshots for README
 ├── .env
 └── README.md
-👩‍💻 Author
+##👩‍💻 Author
 Rupa Padala
-📫 GitHub Profile
+📫 GitHub Profile(https://github.com/rupa-1122/)
 
-📃 License
+##📃 License
 This project is licensed under the MIT License – see the LICENSE file for details.
