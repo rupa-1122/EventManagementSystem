@@ -84,7 +84,7 @@ Number
 
 Special character
 
-## 📂 Project Structure
+### 📂 Project Structure
 bash
 Copy
 Edit
@@ -99,9 +99,9 @@ Edit
 ├── screenshots/             # Screenshots for README
 ├── .env
 └── README.md
-## 👩‍💻 Author
+### 👩‍💻 Author
 Rupa Padala
 📫 GitHub Profile(https://github.com/rupa-1122/)
 
-## 📃 License
+### 📃 License
 This project is licensed under the MIT License – see the LICENSE file for details.
