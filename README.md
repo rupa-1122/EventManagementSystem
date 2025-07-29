@@ -72,23 +72,23 @@ npm install
 # Start the development server
 npm run dev
 ⚠️ Ensure MongoDB/MySQL is running locally and DB connection string is set in .env.
+
+---
+## 📋 Registration Rules
+
+Students must use their **Vignan domain email** for registration:  
+`21NM1AXXXX@view.edu.in`
+
+### 🔐 Password requirements:
+- At least one **uppercase** letter  
+- At least one **number**  
+- At least one **special character**
+
 ---
 
-## 📋 Registration Rules
-Students must use Vignan domain email (21NM1AXXXX@view.edu.in)
+## 📂 Project Structure
 
-Passwords should include:
-
-Uppercase letter
-
-Number
-
-Special character
-
-### 📂 Project Structure
-bash
-Copy
-Edit
+```bash
 ├── client/                  # Frontend React app
 │   ├── components/
 │   ├── pages/
@@ -97,12 +97,12 @@ Edit
 │   ├── routes/
 │   ├── controllers/
 │   └── ...
-├── screenshots/             # Screenshots for README
-├── .env
-└── README.md
-### 👩‍💻 Author
+├── screenshots/             
+├── .env                  
+└── README.md                
+👩‍💻 Author
 Rupa Padala
-📫 GitHub Profile(https://github.com/rupa-1122/)
+📫 GitHub Profile
 
-### 📃 License
+📃 License
 This project is licensed under the MIT License – see the LICENSE file for details.
