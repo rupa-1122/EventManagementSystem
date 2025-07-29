@@ -72,6 +72,7 @@ npm install
 # Start the development server
 npm run dev
 ⚠️ Ensure MongoDB/MySQL is running locally and DB connection string is set in .env.
+---
 
 ## 📋 Registration Rules
 Students must use Vignan domain email (21NM1AXXXX@view.edu.in)
