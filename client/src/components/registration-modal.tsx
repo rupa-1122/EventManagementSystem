@@ -45,18 +45,18 @@ export default function RegistrationModal({
     },
     onSuccess: async () => {
       try {
-        // Send email notification
-        await sendRegistrationEmail({
-          eventName: event?.name || "",
-          studentName: formData.fullName,
-          rollNumber: formData.rollNumber,
-          email: formData.emailAddress,
-          phone: formData.phoneNumber,
-          branch: formData.branch,
-          year: formData.yearOfStudy,
-          categories: formData.eventCategories.join(", "),
-          registrationTime: new Date().toLocaleString(),
-        });
+await sendRegistrationEmail({
+  eventName: event?.name || "",                 // 🗓 Event Name
+  studentName: formData.fullName,              // 👤 Full Name
+  rollNumber: formData.rollNumber,             // 🆔 Roll Number
+  email: formData.emailAddress,                // 📧 Email
+  phone: formData.phoneNumber,                 // 📱 Phone
+  branch: formData.branch,                     // 🏫 Branch
+  year: formData.yearOfStudy,                  // 📚 Year
+  categories: formData.eventCategories.join(", "), // 🎯 Categories
+  registrationTime: new Date().toLocaleString(),   // ⏰ Registration time
+});
+
 
         toast({
           title: "Registration successful!",
@@ -162,7 +162,7 @@ export default function RegistrationModal({
               <Label htmlFor="rollNumber">Roll Number *</Label>
               <Input
                 id="rollNumber"
-                placeholder="e.g., 21XM1A0501"
+                placeholder="e.g., 21NM1A0501"
                 value={formData.rollNumber}
                 onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
                 className="mt-2"
@@ -176,7 +176,7 @@ export default function RegistrationModal({
               <Input
                 id="emailAddress"
                 type="email"
-                placeholder="21XM1A0501@view.edu.in"
+                placeholder="21NM1A0501@view.edu.in"
                 value={formData.emailAddress}
                 onChange={(e) => setFormData(prev => ({ ...prev, emailAddress: e.target.value }))}
                 className="mt-2"
@@ -204,8 +204,11 @@ export default function RegistrationModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CSE">Computer Science Engineering</SelectItem>
-                  <SelectItem value="ECE">Electronics & Communication</SelectItem>
-                  <SelectItem value="EEE">Electrical & Electronics</SelectItem>
+                  <SelectItem value="CSC">Cyber Security</SelectItem>
+                  <SelectItem value="CSD">Data Science</SelectItem>
+                  <SelectItem value="CAI">Artificial Intelligence</SelectItem>
+                  <SelectItem value="ECE">Electronics & Communication Engineering</SelectItem>
+                  <SelectItem value="EEE">Electrical & Electronics Engineering</SelectItem>
                   <SelectItem value="MECH">Mechanical Engineering</SelectItem>
                   <SelectItem value="CIVIL">Civil Engineering</SelectItem>
                   <SelectItem value="IT">Information Technology</SelectItem>
@@ -230,7 +233,7 @@ export default function RegistrationModal({
 
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-4">
-              Event Categories for Yuvatarang Fest *
+              Event Categories Fest *
             </Label>
             <p className="text-sm text-muted-foreground mb-4">
               Select the events you're interested in participating in:
@@ -256,7 +259,7 @@ export default function RegistrationModal({
               Cancel
             </Button>
             <Button type="submit" disabled={registrationMutation.isPending} className="bg-blue-500 hover:bg-blue-600">
-              {registrationMutation.isPending ? "Sending..." : "✈ Send Message"}
+              {registrationMutation.isPending ? "Sending..." : "✈ submit"}
             </Button>
           </div>
         </form>

@@ -138,33 +138,34 @@ export default function Login() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary">Vignan's IEVW</h1>
-              <span className="ml-2 text-sm text-muted-foreground">Student Portal</span>
+              <h1 className="text-2xl font-bold text-primary">Vignan Event Management</h1>
+              <span className="ml-2 text-sm text-muted-foreground"> Portal</span>
             </div>
-            <div className="flex space-x-1">
-              <Button
-                variant={activeTab === "student" ? "default" : "ghost"}
-                onClick={() => setActiveTab("student")}
-                className={`border-b-2 rounded-none ${
-                  activeTab === "student" 
-                    ? "border-primary text-primary" 
-                    : "border-transparent text-muted-foreground"
-                }`}
-              >
-                Student Login
-              </Button>
-              <Button
-                variant={activeTab === "admin" ? "default" : "ghost"}
-                onClick={() => setActiveTab("admin")}
-                className={`border-b-2 rounded-none ${
-                  activeTab === "admin" 
-                    ? "border-primary text-primary" 
-                    : "border-transparent text-muted-foreground"
-                }`}
-              >
-                Admin Login
-              </Button>
-            </div>
+            <div className="flex space-x-2">
+  <Button
+    variant="ghost"
+    onClick={() => setActiveTab("student")}
+    className={`rounded-md px-4 py-2 font-medium transition-all duration-200 ${
+      activeTab === "student"
+        ? "bg-blue-600 text-white shadow-md"
+        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+    }`}
+  >
+    Student Login
+  </Button>
+  <Button
+    variant="ghost"
+    onClick={() => setActiveTab("admin")}
+    className={`rounded-md px-4 py-2 font-medium transition-all duration-200 ${
+      activeTab === "admin"
+        ? "bg-purple-600 text-white shadow-md"
+        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+    }`}
+  >
+    Admin Login
+  </Button>
+</div>
+
           </div>
         </div>
       </header>
@@ -369,7 +370,7 @@ export default function Login() {
                   <div>
                     <h3 className="text-sm font-medium text-primary mb-1">Student Registration</h3>
                     <p className="text-xs text-muted-foreground">
-                      Students register with their VIEW email format: 21XM1A0501@view.edu.in. 
+                      Students register with their VIEW email format: 21XM1AXX01@view.edu.in. 
                       Password must contain uppercase, number, and special character.
                     </p>
                   </div>

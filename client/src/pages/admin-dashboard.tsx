@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Registered Students</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.registeredStudents || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats?.totalRegistrations || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -265,10 +265,7 @@ export default function AdminDashboard() {
             <Plus className="mr-2 h-4 w-4" />
             Manage Categories
           </Button>
-          <Button onClick={() => setShowCreateEventModal(true)} className="bg-blue-500 hover:bg-blue-600">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Event
-          </Button>
+         
         </div>
 
         {/* User Management Section */}

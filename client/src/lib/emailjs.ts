@@ -17,17 +17,17 @@ export interface RegistrationEmailData {
 
 export const sendRegistrationEmail = async (data: RegistrationEmailData): Promise<void> => {
   const templateParams = {
-    to_email: 'admin@view.edu.in',
-    event_name: data.eventName,
-    student_name: data.studentName,
-    roll_number: data.rollNumber,
-    email: data.email,
-    phone: data.phone,
-    branch: data.branch,
-    year: data.year,
-    categories: data.categories,
-    registration_time: data.registrationTime
-  };
+  eventName: data.eventName,
+  studentName: data.studentName,
+  rollNumber: data.rollNumber,
+  email: data.email,
+  phone: data.phone,
+  branch: data.branch,
+  year: data.year,
+  categories: data.categories,
+  registrationTime: data.registrationTime,
+};
+
 
   try {
     await emailjs.send('service_fkb2flr', 'template_bn5g7lg', templateParams);
