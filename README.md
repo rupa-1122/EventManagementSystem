@@ -34,7 +34,7 @@ A responsive web application for managing student events at Vignan Institute. It
 ![Student Registration](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/2.png)
 
 ### 📊 Student Dashboard
-![Student Dashboard] (https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/3.png)
+![Student Dashboard](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/3.png)
 
 ### 📝 Event Registration Form
 ![Event Registration Form](https://raw.githubusercontent.com/rupa-1122/EventManagementSystem/refs/heads/main/img/4.png)
