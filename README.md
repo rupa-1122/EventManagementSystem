@@ -73,7 +73,7 @@ npm install
 npm run dev
 ⚠️ Ensure MongoDB/MySQL is running locally and DB connection string is set in .env.
 
-##📋 Registration Rules
+## 📋 Registration Rules
 Students must use Vignan domain email (21NM1AXXXX@view.edu.in)
 
 Passwords should include:
@@ -99,9 +99,9 @@ Edit
 ├── screenshots/             # Screenshots for README
 ├── .env
 └── README.md
-##👩‍💻 Author
+## 👩‍💻 Author
 Rupa Padala
 📫 GitHub Profile(https://github.com/rupa-1122/)
 
-##📃 License
+## 📃 License
 This project is licensed under the MIT License – see the LICENSE file for details.
